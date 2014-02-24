@@ -1,35 +1,16 @@
-PdfTools
-========
+PdfTools v1.0-dev :
+===================
 
-Compilation of PDF Libraries (FPDI, FPDF, HTML2PDF) to read and write pdf.
+**Important : this version is a new build from scratch, it is not usable**
 
-**Important : this module is at an alpha stage !!!**
+A new approach for a new Tool for reading, editing, saving PDF Files. A whole rebuilt based on current libs widely used.
 
-Installation : 
---------------
+Why :
+-----
 
-copy files in module/PdfTools of your project
+I can not stand FPDI, FPDF, HTML2PDF, TCPDF anymore, these libs that are not sufficiently maintained and their authors do not care at all about "keeping up" with php new feature. Old code style make me sick ! A 1MB class file with no isolation, no design pattern correctly placed, untestable...I would rather die that maintain such code myself.
 
-or
+We can not afford to use these libs anymore, php evolve, tools have to evolve too. As php 5.3 support will die soon, this whole new component will be written for php 5.4+ (maybe 5.5+) and bundled as module for common framework. 
 
-```
-git clone https://github.com/SmasherHell/PdfTools.git
-```
 
-then enable PdfTools module in your config/application.config.php
 
-Usage :
--------
-In a Controller or wherever ServiceManager is available :
-
-```
-$pdfTools = $serviceManager->get('PdfTools');
-```
-
-will return a decorated instance of HTML2PDF.
-
-To access FPDI within HTML2PDF just use :
-
-```
-$pdfHandler = $pdfTools->getPdfHandler();
-```
