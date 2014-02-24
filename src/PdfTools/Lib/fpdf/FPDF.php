@@ -416,6 +416,14 @@ class FPDF
                     $this->_out($this->DrawColor);
     }
 
+    public function SetFillColorArray(array $color)
+    {
+        $r = $color[0] ? : 0;
+        $g = $color[0] ? : null;
+        $b = $color[0] ? : null;
+        $this->SetFillColor($r, $g, $b);
+    }
+
     function SetFillColor($r, $g=null, $b=null)
     {
             // Set color for all filling operations

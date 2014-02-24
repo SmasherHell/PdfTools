@@ -31,6 +31,7 @@ class Pdf extends AbstractHelper
      */
     public function __invoke($data, $filename = "")
     {
+        
         $length = strlen($data);
         if (!$this->response instanceof Response) {
             return $data;
@@ -43,7 +44,6 @@ class Pdf extends AbstractHelper
             $headers->addHeaderLine("Content-Type: application/force-download");
             $headers->addHeaderLine('Content-Disposition: attachment; filename="' . urlencode($filename) . '"');
         }
-        
         return $data;
     }
 

@@ -25,4 +25,17 @@ class Module implements AutoloaderProviderInterface
             ),
         );
     }
+    public function getViewHelperConfig()
+    {
+        return array(
+            'factories' => array(
+                'pdf' => function ($pm) {
+                    $response = $pm->getServiceLocator()->get('Response');
+                    $plugin = new View\Helper\Pdf();
+                    $plugin->setResponse($response);
+                    return $plugin;
+                },
+            ),
+        );
+    }
 }

@@ -342,11 +342,11 @@ class HTML2PDF_parsingCss
 
         // apply the font
         $this->_pdf->SetFont($family, $style, $this->value['mini-size']*$size);
-        $this->_pdf->setTextColorArray($this->value['color']);
+        $this->_pdf->SetTextColorArray($this->value['color']);
         if ($this->value['background']['color'])
-            $this->_pdf->setFillColorArray($this->value['background']['color']);
+            $this->_pdf->SetFillColorArray($this->value['background']['color']);
         else
-            $this->_pdf->setFillColor(255);
+            $this->_pdf->SetFillColor(255);
     }
 
      /**
