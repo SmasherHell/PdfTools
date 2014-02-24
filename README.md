@@ -3,6 +3,8 @@ PdfTools
 
 Compilation of PDF Libraries (FPDI, FPDF, HTML2PDF) to read and write pdf.
 
+**Important : this module is at an alpha stage !!!**
+
 Installation : 
 --------------
 
