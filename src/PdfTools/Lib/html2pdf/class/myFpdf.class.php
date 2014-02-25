@@ -1413,5 +1413,170 @@ class HTML2PDF_myFpdf extends \PdfTools\fpdi\FPDI
     {
         $this->_myLastPageGroupNb = $myLastPageGroupNb;
     }
+    
+    /*
+     * TCPDF PORTAGE FOR FPDF
+     */
+    
+    public function Polygon($p, $style='', $line_style=array(), $fill_color=array(), $closed=true)
+    {
+        $nc = count($p); // number of coordinates
+        $np = $nc / 2; // number of points
+        if ($closed) {
+            // close polygon by adding the first 2 points at the end (one line)
+            for ($i = 0; $i < 4; ++$i) {
+                $p[$nc + $i] = $p[$i];
+            }
+            // copy style for the last added line
+            if (isset($line_style[0])) {
+                $line_style[$np] = $line_style[0];
+            }
+            $nc += 4;
+        }
+        if (!(false === strpos($style, 'F')) AND isset($fill_color)) {
+            $this->SetFillColorArray($fill_color);
+        }
+        $op = $this->getPathPaintOperator($style);
+        if ($op == 'f') {
+            $line_style = array();
+        }
+        $draw = true;
+        if ($line_style) {
+            if (isset($line_style['all'])) {
+                $this->SetLineStyle($line_style['all']);
+            } else {
+                $draw = false;
+                if ($op == 'B') {
+                    // draw fill
+                    $op = 'f';
+                    $this->_outPoint($p[0], $p[1]);
+                    for ($i = 2; $i < $nc; $i = $i + 2) {
+                        $this->_outLine($p[$i], $p[$i + 1]);
+                    }
+                    $this->_out($op);
+                }
+                // draw outline
+                $this->_outPoint($p[0], $p[1]);
+                for ($i = 2; $i < $nc; $i = $i + 2) {
+                    $line_num = ($i / 2) - 1;
+                    if (isset($line_style[$line_num])) {
+                        if ($line_style[$line_num] != 0) {
+                            if (is_array($line_style[$line_num])) {
+                                $this->_out('S');
+                                $this->SetLineStyle($line_style[$line_num]);
+                                $this->_outPoint($p[$i - 2], $p[$i - 1]);
+                                $this->_outLine($p[$i], $p[$i + 1]);
+                                $this->_out('S');
+                                $this->_outPoint($p[$i], $p[$i + 1]);
+                            } else {
+                                $this->_outLine($p[$i], $p[$i + 1]);
+                            }
+                        }
+                    } else {
+                        $this->_outLine($p[$i], $p[$i + 1]);
+                    }
+                }
+                $this->_out($op);
+            }
+        }
+        if ($draw) {
+            $this->_outPoint($p[0], $p[1]);
+            for ($i = 2; $i < $nc; $i = $i + 2) {
+                $this->_outLine($p[$i], $p[$i + 1]);
+            }
+            $this->_out($op);
+        }
+    }
 
+    protected function getPathPaintOperator($style, $default='S')
+    {
+        $op = '';
+        switch($style) {
+            case 'S':
+            case 'D': {
+                $op = 'S';
+                break;
+            }
+            case 's':
+            case 'd': {
+                $op = 's';
+                break;
+            }
+            case 'f':
+            case 'F': {
+                $op = 'f';
+                break;
+            }
+            case 'f*':
+            case 'F*': {
+                $op = 'f*';
+                break;
+            }
+            case 'B':
+            case 'FD':
+            case 'DF': {
+                $op = 'B';
+                break;
+            }
+            case 'B*':
+            case 'F*D':
+            case 'DF*': {
+                $op = 'B*';
+                break;
+            }
+            case 'b':
+            case 'fd':
+            case 'df': {
+                $op = 'b';
+                break;
+            }
+            case 'b*':
+            case 'f*d':
+            case 'df*': {
+                $op = 'b*';
+                break;
+            }
+            case 'CNZ': {
+                $op = 'W n';
+                break;
+            }
+            case 'CEO': {
+                $op = 'W* n';
+                break;
+            }
+            case 'n': {
+                $op = 'n';
+                break;
+            }
+            default: {
+                if (!empty($default)) {
+                    $op = $this->getPathPaintOperator($default, '');
+                } else {
+                    $op = '';
+                }
+            }
+        }
+        return $op;
+    }
+    
+    protected function _outPoint($x, $y)
+    {
+		$this->_out(sprintf('%.2F %.2F m', $x * $this->k, ($this->h - $y) * $this->k));
+	}
+    protected function _outLine($x, $y)
+    {
+        $this->_out(sprintf('%.2F %.2F l', $x * $this->k, ($this->h - $y) * $this->k));
+    }
+    
+    public function SetFillColorArray(array $color)
+    {
+        if (empty($color)) {
+            return;
+        }
+        
+        $r = $color[0] ? : 0;
+        $g = $color[1] ? : null;
+        $b = $color[2] ? : null;
+        $this->SetFillColor($r, $g, $b);
+    }
 }

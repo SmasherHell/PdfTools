@@ -31,11 +31,11 @@ class Pdf extends AbstractHelper
      */
     public function __invoke($data, $filename = "")
     {
-        
         $length = strlen($data);
-        if (!$this->response instanceof Response) {
+        if (!$this->response instanceof Response || substr($data, 0, 5) != '%PDF-') {
             return $data;
         }
+        // var_dump($data); exit;
         $headers = $this->response->getHeaders();
         if (empty($filename)) {
             $headers->addHeaderLine('Content-Type', 'application/pdf');

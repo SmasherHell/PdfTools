@@ -1,5 +1,5 @@
-PdfTools
-========
+PdfTools v0.0.1a
+============
 
 Compilation of PDF Libraries (FPDI, FPDF, HTML2PDF) to read and write pdf.
 
