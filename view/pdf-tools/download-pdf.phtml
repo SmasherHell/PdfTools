@@ -1,1 +1,7 @@
-<?php echo $this->pdf($this->content, 'download.pdf'); ?>
+<?php
+if (isset($this->filename)) {
+    echo $this->pdf($this->content, $this->filename);
+} else {
+    echo $this->pdf($this->content, 'download.pdf');
+}
+?>
