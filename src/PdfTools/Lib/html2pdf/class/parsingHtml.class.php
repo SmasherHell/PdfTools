@@ -12,6 +12,35 @@ namespace PdfTools\html2pdf;
 
 class HTML2PDF_parsingHtml
 {
+    protected $_utf8tolatin = array (
+        8364=>128, # Euro1
+        338=>140,  # OE
+        352=>138,  # Scaron
+        376=>159,  # Ydieresis
+        381=>142,  # Zcaron2
+        8226=>149, # bullet3
+        710=>136,  # circumflex
+        8224=>134, # dagger
+        8225=>135, # daggerdbl
+        8230=>133, # ellipsis
+        8212=>151, # emdash
+        8211=>150, # endash
+        402=>131,  # florin
+        8249=>139, # guilsinglleft
+        8250=>155, # guilsinglright
+        339=>156,  # oe
+        8240=>137, # perthousand
+        8222=>132, # quotedblbase
+        8220=>147, # quotedblleft
+        8221=>148, # quotedblright
+        8216=>145, # quoteleft
+        8217=>146, # quoteright
+        8218=>130, # quotesinglbase
+        353=>154,  # scaron
+        732=>152,  # tilde
+        8482=>153, # trademark
+        382=>158   # zcaron2
+        );
     protected    $_html     = '';        // HTML code to parse
     protected    $_num      = 0;         // table number
     protected    $_level    = 0;         // table level
@@ -234,8 +263,94 @@ class HTML2PDF_parsingHtml
     {
         if ($spaces) $txt = preg_replace('/\s+/is', ' ', $txt);
         $txt = str_replace('&euro;', '€', $txt);
+        $txt = $this->UTF8ToLatin1($txt);
+        // var_dump($txt); 
         $txt = html_entity_decode($txt, ENT_QUOTES, $this->_encoding);
         return $txt;
+    }
+    
+    protected function UTF8StringToArray($str) {
+        $unicode = array(); // array containing unicode values
+        $bytes  = array(); // array containing single character byte sequences
+        $numbytes  = 1; // number of octetc needed to represent the UTF-8 character
+        $str .= ''; // force $str to be a string
+        $length = strlen($str);
+        for ($i = 0; $i < $length; ++$i) {
+            $char = ord($str{$i}); // get one string character at time
+            if (count($bytes) == 0) { // get starting octect
+                if ($char <= 0x7F) {
+                    $unicode[] = $char; // use the character "as is" because is ASCII
+                    $numbytes = 1;
+                } elseif (($char >> 0x05) == 0x06) { // 2 bytes character (0x06 = 110 BIN)
+                    $bytes[] = ($char - 0xC0) << 0x06;
+                    $numbytes = 2;
+                } elseif (($char >> 0x04) == 0x0E) { // 3 bytes character (0x0E = 1110 BIN)
+                    $bytes[] = ($char - 0xE0) << 0x0C;
+                    $numbytes = 3;
+                } elseif (($char >> 0x03) == 0x1E) { // 4 bytes character (0x1E = 11110 BIN)
+                    $bytes[] = ($char - 0xF0) << 0x12;
+                    $numbytes = 4;
+                } else {
+                    // use replacement character for other invalid sequences
+                    $unicode[] = 0xFFFD;
+                    $bytes = array();
+                    $numbytes = 1;
+                }
+            } elseif (($char >> 0x06) == 0x02) { // bytes 2, 3 and 4 must start with 0x02 = 10 BIN
+                $bytes[] = $char - 0x80;
+                if (count($bytes) == $numbytes) {
+                    // compose UTF-8 bytes to a single unicode value
+                    $char = $bytes[0];
+                    for ($j = 1; $j < $numbytes; ++$j) {
+                        $char += ($bytes[$j] << (($numbytes - $j - 1) * 0x06));
+                    }
+                    if ((($char >= 0xD800) AND ($char <= 0xDFFF)) OR ($char >= 0x10FFFF)) {
+                        /* The definition of UTF-8 prohibits encoding character numbers between
+                        U+D800 and U+DFFF, which are reserved for use with the UTF-16
+                        encoding form (as surrogate pairs) and do not directly represent
+                        characters. */
+                        $unicode[] = 0xFFFD; // use replacement character
+                    } else {
+                        $unicode[] = $char; // add char to array
+                    }
+                    // reset data for next char
+                    $bytes = array();
+                    $numbytes = 1;
+                }
+            } else {
+                // use replacement character for other invalid sequences
+                $unicode[] = 0xFFFD;
+                $bytes = array();
+                $numbytes = 1;
+            }
+        }
+        return $unicode;
+    }
+    
+    /**
+     * Converts UTF-8 strings to Latin1 when using the standard 14 core fonts.<br>
+     * @param string $str string to process.
+     * @return string
+     * @author Andrew Whitehead, Nicola Asuni
+     * @access protected
+     * @since 3.2.000 (2008-06-23)
+     */
+    protected function UTF8ToLatin1($str) {
+        $outstr = ''; // string to be returned
+        $unicode = $this->UTF8StringToArray($str); // array containing UTF-8 unicode values
+        foreach ($unicode as $char) {
+            if ($char < 256) {
+                $outstr .= chr($char);
+            } elseif (array_key_exists($char, $this->_utf8tolatin)) {
+                // map from UTF-8
+                $outstr .= chr($this->_utf8tolatin[$char]);
+            } elseif ($char == 0xFFFD) {
+                // skip
+            } else {
+                $outstr .= '?';
+            }
+        }
+        return $outstr;
     }
 
     /**

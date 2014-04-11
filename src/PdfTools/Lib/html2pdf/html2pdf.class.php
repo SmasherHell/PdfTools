@@ -1181,7 +1181,8 @@ class HTML2PDF
     protected function _makeHTMLcode()
     {
         // foreach elements of the parsing
-        for ($this->_parsePos=0; $this->_parsePos<count($this->parsingHtml->code); $this->_parsePos++) {
+        $cntCode = count($this->parsingHtml->code);
+        for ($this->_parsePos=0; $this->_parsePos<$cntCode; $this->_parsePos++) {
 
             // get the action to do
             $action = $this->parsingHtml->code[$this->_parsePos];

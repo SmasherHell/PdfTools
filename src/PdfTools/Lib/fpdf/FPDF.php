@@ -73,6 +73,8 @@ class FPDF
     var $creator;            // creator
     var $AliasNbPages;       // alias for total number of pages
     var $PDFVersion;         // PDF version number
+    private $_encoding;
+    private $internal_encoding;
 
     /*******************************************************************************
     *                                                                              *
@@ -80,9 +82,14 @@ class FPDF
     *                                                                              *
     *******************************************************************************/
     
-    function __construct($orientation='P', $unit='mm', $size='A4')
+    function __construct($orientation='P', $unit='mm', $size='A4', $encoding = 'UTF-8')
     {
-        // parent::__construct($orientation, $unit, $size);
+        if (function_exists('mb_internal_encoding') && mb_internal_encoding()) {
+            $this->internal_encoding = mb_internal_encoding();
+            mb_internal_encoding('ASCII');
+        }
+
+// parent::__construct($orientation, $unit, $size);
             // Some checks
             $this->_dochecks();
             // Initialization of properties
@@ -175,6 +182,14 @@ class FPDF
             $this->PDFVersion = '1.3';
             
             $this->AliasNbPages();
+            $this->_encoding = $encoding;
+    }
+
+    public function __destruct() {
+        // restore internal encoding
+        if (isset($this->internal_encoding) && !empty($this->internal_encoding)) {
+            mb_internal_encoding($this->internal_encoding);
+        }
     }
     
     function SetMargins($left, $top, $right = -1, $keepmargins = false)
