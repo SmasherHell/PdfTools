@@ -10,7 +10,7 @@
  */
 namespace PdfTools\html2pdf;
 
-class HTML2PDF_exception extends exception
+class HTML2PDF_exception extends \Exception
 {
     protected $_tag = null;
     protected $_html = null;
